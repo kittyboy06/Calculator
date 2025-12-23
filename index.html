@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Calc | Advanced Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Ionicons for premium icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass">
+            <div class="logo">
+                <ion-icon name="prism-outline"></ion-icon>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="calculator" title="Standard & Scientific">
+                    <ion-icon name="calculator-outline"></ion-icon>
+                </li>
+                <li data-tab="programmer" title="Programmer">
+                    <ion-icon name="code-slash-outline"></ion-icon>
+                </li>
+                <li data-tab="converter" title="Unit Converter">
+                    <ion-icon name="swap-horizontal-outline"></ion-icon>
+                </li>
+            </ul>
+            <div class="theme-toggle">
+                <ion-icon name="moon-outline"></ion-icon>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            
+            <!-- Standard / Scientific Calculator -->
+            <section id="calculator" class="tab-content active">
+                <div class="calculator-card glass">
+                    <div class="display-container">
+                        <div class="history" id="calc-history"></div>
+                        <div class="current-input" id="calc-display">0</div>
+                    </div>
+                    <div class="keypad-grid">
+                        <!-- Scientific Functions -->
+                        <button class="btn scientific" data-action="sin">sin</button>
+                        <button class="btn scientific" data-action="cos">cos</button>
+                        <button class="btn scientific" data-action="tan">tan</button>
+                        <button class="btn scientific" data-action="log">log</button>
+                        <button class="btn scientific" data-action="ln">ln</button>
+                        <button class="btn scientific" data-action="sqrt">√</button>
+                        <button class="btn scientific" data-action="pow">xʸ</button>
+                        <button class="btn scientific" data-action="pi">π</button>
+                        <button class="btn scientific" data-action="e">e</button>
+                        <button class="btn action warning" data-action="clear">AC</button>
+                        <button class="btn action" data-action="delete"><ion-icon name="backspace-outline"></ion-icon></button>
+                        <button class="btn operator" data-action="%">%</button>
+                        <button class="btn operator" data-action="/">÷</button>
+
+                        <button class="btn number" data-value="7">7</button>
+                        <button class="btn number" data-value="8">8</button>
+                        <button class="btn number" data-value="9">9</button>
+                        <button class="btn operator" data-action="*">×</button>
+
+                        <button class="btn number" data-value="4">4</button>
+                        <button class="btn number" data-value="5">5</button>
+                        <button class="btn number" data-value="6">6</button>
+                        <button class="btn operator" data-action="-">-</button>
+
+                        <button class="btn number" data-value="1">1</button>
+                        <button class="btn number" data-value="2">2</button>
+                        <button class="btn number" data-value="3">3</button>
+                        <button class="btn operator" data-action="+">+</button>
+
+                        <button class="btn number" data-value="00">00</button>
+                        <button class="btn number" data-value="0">0</button>
+                        <button class="btn number" data-value=".">.</button>
+                        <button class="btn equals" data-action="=">=</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Programmer Calculator -->
+            <section id="programmer" class="tab-content">
+                <div class="calculator-card glass wide">
+                    <div class="display-container programmer-display">
+                        <div class="bit-display" id="prog-bin-display">0000 0000 0000 0000 0000 0000 0000 0000</div>
+                        <div class="main-values">
+                            <div class="base-row active" data-base="16">
+                                <span class="label">HEX</span>
+                                <span class="value" id="hex-val">0</span>
+                            </div>
+                            <div class="base-row" data-base="10">
+                                <span class="label">DEC</span>
+                                <span class="value" id="dec-val">0</span>
+                            </div>
+                            <div class="base-row" data-base="8">
+                                <span class="label">OCT</span>
+                                <span class="value" id="oct-val">0</span>
+                            </div>
+                            <div class="base-row" data-base="2">
+                                <span class="label">BIN</span>
+                                <span class="value" id="bin-val">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="keypad-grid programmer-grid">
+                        <button class="btn hex" data-value="A">A</button>
+                        <button class="btn hex" data-value="B">B</button>
+                        <button class="btn operator" data-action="<<">≪</button>
+                        <button class="btn operator" data-action=">>">≫</button>
+                        <button class="btn action warning" data-action="clear">AC</button>
+                        <button class="btn action" data-action="delete">⌫</button>
+
+                        <button class="btn hex" data-value="C">C</button>
+                        <button class="btn hex" data-value="D">D</button>
+                        <button class="btn logic" data-action="AND">AND</button>
+                        <button class="btn logic" data-action="OR">OR</button>
+                        <button class="btn logic" data-action="NOT">NOT</button>
+                        <button class="btn logic" data-action="XOR">XOR</button>
+
+                        <button class="btn hex" data-value="E">E</button>
+                        <button class="btn hex" data-value="F">F</button>
+                        <button class="btn number" data-value="7">7</button>
+                        <button class="btn number" data-value="8">8</button>
+                        <button class="btn number" data-value="9">9</button>
+                        <button class="btn operator" data-action="/">÷</button>
+
+                        <button class="btn number disabled" data-value="(">(</button>
+                        <button class="btn number disabled" data-value=")">)</button>
+                        <button class="btn number" data-value="4">4</button>
+                        <button class="btn number" data-value="5">5</button>
+                        <button class="btn number" data-value="6">6</button>
+                        <button class="btn operator" data-action="*">×</button>
+
+                        <button class="btn number disabled" data-value="x">x</button>
+                        <button class="btn number disabled" data-value="y">y</button>
+                        <button class="btn number" data-value="1">1</button>
+                        <button class="btn number" data-value="2">2</button>
+                        <button class="btn number" data-value="3">3</button>
+                        <button class="btn operator" data-action="-">-</button>
+
+                        <button class="btn number disabled" data-value="z">z</button>
+                        <button class="btn number disabled" data-value="w">w</button>
+                        <button class="btn number disabled" data-value="00">00</button>
+                        <button class="btn number" data-value="0">0</button>
+                        <button class="btn number disabled" data-value=".">.</button>
+                        <button class="btn operator" data-action="+">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Unit Converter -->
+            <section id="converter" class="tab-content">
+                <div class="calculator-card glass converter-card">
+                    <h2 class="section-title">Unit Converter</h2>
+                    
+                    <div class="converter-controls">
+                        <div class="control-group">
+                            <label>Category</label>
+                            <select id="unit-category" class="glass-input">
+                                <option value="length">Length</option>
+                                <option value="mass">Mass</option>
+                                <option value="temperature">Temperature</option>
+                                <option value="data">Data</option>
+                                <option value="time">Time</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="conversion-row">
+                        <div class="input-group">
+                            <input type="number" id="convert-from-val" class="glass-input big-input" value="1" placeholder="0">
+                            <select id="convert-from-unit" class="glass-input small-select"></select>
+                        </div>
+                        <div class="equals-icon">
+                            <ion-icon name="arrow-forward-outline"></ion-icon>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="convert-to-val" class="glass-input big-input" readonly placeholder="0">
+                            <select id="convert-to-unit" class="glass-input small-select"></select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
