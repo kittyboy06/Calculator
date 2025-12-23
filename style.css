@@ -622,6 +622,10 @@ body {
     align-items: center;
     cursor: grab;
     transition: 0.2s;
+    touch-action: none;
+    /* Critical for custom drag */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .palette-item:hover {
@@ -643,6 +647,8 @@ body {
     background-size: 20px 20px;
     border-radius: var(--radius-md);
     overflow: hidden;
+    touch-action: none;
+    /* Prevent scrolling while dragging/wiring */
 }
 
 /* Gate Components on Board */

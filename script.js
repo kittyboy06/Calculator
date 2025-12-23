@@ -434,11 +434,6 @@ class LogicBoard {
         document.getElementById('open-board-btn').addEventListener('click', () => {
             this.container.classList.remove('hidden');
         });
-        document.getElementById('open-board-btn').addEventListener('touchstart', (e) => {
-            // Basic touch click support
-            this.container.classList.remove('hidden');
-            e.preventDefault();
-        });
         document.getElementById('close-board').addEventListener('click', () => {
             this.container.classList.add('hidden');
         });
