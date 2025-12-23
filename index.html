@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Calc | Advanced Suite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Ionicons for premium icons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
+
 <body>
 
     <div class="app-container">
@@ -38,7 +42,7 @@
 
         <!-- Main Content -->
         <main class="content-area">
-            
+
             <!-- Standard / Scientific Calculator -->
             <section id="calculator" class="tab-content active">
                 <div class="calculator-card glass">
@@ -58,7 +62,8 @@
                         <button class="btn scientific" data-action="pi">π</button>
                         <button class="btn scientific" data-action="e">e</button>
                         <button class="btn action warning" data-action="clear">AC</button>
-                        <button class="btn action" data-action="delete"><ion-icon name="backspace-outline"></ion-icon></button>
+                        <button class="btn action" data-action="delete"><ion-icon
+                                name="backspace-outline"></ion-icon></button>
                         <button class="btn operator" data-action="%">%</button>
                         <button class="btn operator" data-action="/">÷</button>
 
@@ -90,6 +95,8 @@
                 <div class="calculator-card glass wide">
                     <div class="display-container programmer-display">
                         <div class="bit-display" id="prog-bin-display">0000 0000 0000 0000 0000 0000 0000 0000</div>
+                        <button class="btn scientific" id="open-board-btn"
+                            style="width: 100%; margin-bottom: 10px;">Open Logic Board ⚡</button>
                         <div class="main-values">
                             <div class="base-row active" data-base="16">
                                 <span class="label">HEX</span>
@@ -153,13 +160,59 @@
                         <button class="btn operator" data-action="+">+</button>
                     </div>
                 </div>
+
+                <!-- Logic Board Section -->
+                <div class="logic-board-container hidden" id="logic-board-container">
+                    <div class="board-toolbar">
+                        <h3>Logic Circuit Board</h3>
+                        <div id="expression-display" class="expression-display">Expression: </div>
+                        <div class="board-actions">
+                            <button class="btn action" id="clear-board">Clear</button>
+                            <button class="btn operator" id="close-board">Back to Calc</button>
+                        </div>
+                    </div>
+                    <div class="logic-workspace">
+                        <div class="component-palette glass">
+                            <h4>Gates</h4>
+                            <div class="palette-item" draggable="true" data-type="AND">
+                                <div class="gate-preview and"></div>
+                                <span>AND</span>
+                            </div>
+                            <div class="palette-item" draggable="true" data-type="OR">
+                                <div class="gate-preview or"></div>
+                                <span>OR</span>
+                            </div>
+                            <div class="palette-item" draggable="true" data-type="NOT">
+                                <div class="gate-preview not"></div>
+                                <span>NOT</span>
+                            </div>
+                            <div class="palette-item" draggable="true" data-type="XOR">
+                                <div class="gate-preview xor"></div>
+                                <span>XOR</span>
+                            </div>
+                            <h4>IO</h4>
+                            <div class="palette-item" draggable="true" data-type="SWITCH">
+                                <div class="gate-preview switch"></div>
+                                <span>Switch</span>
+                            </div>
+                            <div class="palette-item" draggable="true" data-type="LIGHT">
+                                <div class="gate-preview light"></div>
+                                <span>Light</span>
+                            </div>
+                        </div>
+                        <div class="board-canvas glass" id="logic-canvas">
+                            <svg id="wire-layer"></svg>
+                            <!-- Components will be dropped here -->
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Unit Converter -->
             <section id="converter" class="tab-content">
                 <div class="calculator-card glass converter-card">
                     <h2 class="section-title">Unit Converter</h2>
-                    
+
                     <div class="converter-controls">
                         <div class="control-group">
                             <label>Category</label>
@@ -175,14 +228,16 @@
 
                     <div class="conversion-row">
                         <div class="input-group">
-                            <input type="number" id="convert-from-val" class="glass-input big-input" value="1" placeholder="0">
+                            <input type="number" id="convert-from-val" class="glass-input big-input" value="1"
+                                placeholder="0">
                             <select id="convert-from-unit" class="glass-input small-select"></select>
                         </div>
                         <div class="equals-icon">
                             <ion-icon name="arrow-forward-outline"></ion-icon>
                         </div>
                         <div class="input-group">
-                            <input type="number" id="convert-to-val" class="glass-input big-input" readonly placeholder="0">
+                            <input type="number" id="convert-to-val" class="glass-input big-input" readonly
+                                placeholder="0">
                             <select id="convert-to-unit" class="glass-input small-select"></select>
                         </div>
                     </div>
@@ -194,4 +249,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
