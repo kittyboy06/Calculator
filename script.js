@@ -76,6 +76,11 @@ class Calculator {
     }
 
     handleAction(action) {
+        if (['+', '-', '*', '/', '%'].includes(action)) {
+            this.appendOperator(action);
+            return;
+        }
+
         switch (action) {
             case 'clear': this.clear(); break;
             case 'delete': this.delete(); break;
