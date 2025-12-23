@@ -426,12 +426,18 @@ class LogicBoard {
 
         this.initUI();
         this.initDragDrop();
+        this.initTouchSupport();
     }
 
     initUI() {
         // Toggle Board
         document.getElementById('open-board-btn').addEventListener('click', () => {
             this.container.classList.remove('hidden');
+        });
+        document.getElementById('open-board-btn').addEventListener('touchstart', (e) => {
+            // Basic touch click support
+            this.container.classList.remove('hidden');
+            e.preventDefault();
         });
         document.getElementById('close-board').addEventListener('click', () => {
             this.container.classList.add('hidden');
@@ -490,10 +496,11 @@ class LogicBoard {
         let isDragging = false;
         let startX, startY;
 
+        // Mouse Drag
         gate.element.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('io-node') || this.isWiring) return;
             isDragging = true;
-            startX = e.offsetX; // relative to element
+            startX = e.offsetX;
             startY = e.offsetY;
             gate.element.style.zIndex = 100;
         });
@@ -501,16 +508,44 @@ class LogicBoard {
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const rect = this.canvas.getBoundingClientRect();
-            let newX = e.clientX - rect.left - 40; // center offset
+            let newX = e.clientX - rect.left - 40;
             let newY = e.clientY - rect.top - 30;
 
             gate.updatePosition(newX, newY);
-
-            // Update connected wires
             this.updateWiresForGate(gate);
         });
 
         window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                gate.element.style.zIndex = '';
+            }
+        });
+
+        // Touch Drag
+        gate.element.addEventListener('touchstart', (e) => {
+            if (e.target.classList.contains('io-node') || this.isWiring) return;
+            e.preventDefault();
+            isDragging = true;
+            const touch = e.touches[0];
+            const rect = gate.element.getBoundingClientRect();
+            startX = touch.clientX - rect.left;
+            startY = touch.clientY - rect.top;
+            gate.element.style.zIndex = 100;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const canvasRect = this.canvas.getBoundingClientRect();
+            let newX = touch.clientX - canvasRect.left - startX;
+            let newY = touch.clientY - canvasRect.top - startY;
+
+            gate.updatePosition(newX, newY);
+            this.updateWiresForGate(gate);
+        });
+
+        window.addEventListener('touchend', () => {
             if (isDragging) {
                 isDragging = false;
                 gate.element.style.zIndex = '';
@@ -521,7 +556,6 @@ class LogicBoard {
     /* --- Wiring System --- */
     startWiring(node, gateId, type) {
         if (this.isWiring) {
-            // Check if completing connection
             if (this.wiringStartNode !== node && this.wiringStartNode.dataset.type !== type) {
                 this.completeWiring(node, gateId, type);
             } else {
@@ -530,20 +564,23 @@ class LogicBoard {
             return;
         }
 
-        // Start new wire
         this.isWiring = true;
-        this.wiringStartNode = node; // DOM Element
+        this.wiringStartNode = node;
         this.wiringStartGateId = gateId;
-        this.wiringStartType = type; // 'input' or 'output'
+        this.wiringStartType = type;
 
-        // Create SVG line
         this.tempWire = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         this.tempWire.setAttribute('class', 'wire dragging');
         this.wireLayer.appendChild(this.tempWire);
 
-        // Follow mouse
         this.mouseMoveHandler = (e) => this.updateTempWire(e);
+        this.touchMoveHandler = (e) => this.updateTempWireTouch(e);
+
         window.addEventListener('mousemove', this.mouseMoveHandler);
+        window.addEventListener('touchmove', this.touchMoveHandler, { passive: false });
+
+        this.touchEndHandler = (e) => this.completeWiringTouch(e);
+        window.addEventListener('touchend', this.touchEndHandler);
     }
 
     updateTempWire(e) {
@@ -556,47 +593,77 @@ class LogicBoard {
         const x2 = e.clientX - rect.left;
         const y2 = e.clientY - rect.top;
 
-        // Bezier curve
         const path = `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`;
         this.tempWire.setAttribute('d', path);
     }
 
-    completeWiring(endNode, endGateId, endType) {
-        // Validation: must be input-to-output or vice versa
-        // StartNode is DOM, EndNode is DOM
+    updateTempWireTouch(e) {
+        e.preventDefault();
+        if (!this.tempWire) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const startRect = this.wiringStartNode.getBoundingClientRect();
+        const touch = e.touches[0];
 
+        const x1 = startRect.left + startRect.width / 2 - rect.left;
+        const y1 = startRect.top + startRect.height / 2 - rect.top;
+        const x2 = touch.clientX - rect.left;
+        const y2 = touch.clientY - rect.top;
+
+        const path = `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`;
+        this.tempWire.setAttribute('d', path);
+    }
+
+    completeWiringTouch(e) {
+        if (!this.isWiring) return;
+        const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+        if (target && target.classList.contains('io-node')) {
+            const gateObj = this.gates.find(g => g.element.contains(target));
+            if (gateObj) {
+                let type = 'output';
+                if (target.classList.contains('input-1')) type = 'input-1';
+                else if (target.classList.contains('input-2')) type = 'input-2';
+                else if (target.classList.contains('input')) type = 'input';
+                else if (target.classList.contains('output')) type = 'output';
+
+                this.completeWiring(target, gateObj.id, type);
+                return;
+            }
+        }
+        this.cancelWiring();
+    }
+
+    completeWiring(endNode, endGateId, endType) {
         let outNode, inNode, outGateId, inGateId;
+        let inputIndex = 0;
 
         if (this.wiringStartType === 'output' && endType.includes('input')) {
             outNode = this.wiringStartNode;
             outGateId = this.wiringStartGateId;
             inNode = endNode;
             inGateId = endGateId;
-            // Get input index
-            var inputIndex = endType === 'input-1' ? 0 : (endType === 'input-2' ? 1 : 0);
+            inputIndex = endType === 'input-1' ? 0 : (endType === 'input-2' ? 1 : 0);
         } else if (this.wiringStartType.includes('input') && endType === 'output') {
             inNode = this.wiringStartNode;
             inGateId = this.wiringStartGateId;
             outNode = endNode;
             outGateId = endGateId;
-            var inputIndex = this.wiringStartType === 'input-1' ? 0 : (this.wiringStartType === 'input-2' ? 1 : 0);
+            inputIndex = this.wiringStartType === 'input-1' ? 0 : (this.wiringStartType === 'input-2' ? 1 : 0);
         } else {
             this.cancelWiring();
             return;
         }
 
-        // Create permanent wire model
         const wire = {
             id: Date.now(),
             fromGate: outGateId,
             toGate: inGateId,
-            toInputIndex: inputIndex, // 0 for single/top, 1 for bottom
+            toInputIndex: inputIndex,
             element: this.tempWire
         };
 
         this.tempWire.classList.remove('dragging');
-
-        // Add delete listener (Right click)
         this.tempWire.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             this.removeWire(wire.id);
@@ -604,16 +671,12 @@ class LogicBoard {
 
         this.wires.push(wire);
 
-        // Register connection in gates
         const sourceGate = this.gates.find(g => g.id === outGateId);
         const targetGate = this.gates.find(g => g.id === inGateId);
 
-        // Linking
-        targetGate.inputs[inputIndex] = sourceGate;
+        if (targetGate) targetGate.inputs[inputIndex] = sourceGate;
 
-        // Initial visual update
         this.updateWireVisual(wire);
-
         this.cleanupWiringEvents();
         this.runSimulation();
     }
@@ -625,17 +688,12 @@ class LogicBoard {
         const wire = this.wires[index];
         const targetGate = this.gates.find(g => g.id === wire.toGate);
 
-        // Unlink
         if (targetGate) {
             targetGate.inputs[wire.toInputIndex] = null;
         }
 
-        // Remove DOM
         if (wire.element) wire.element.remove();
-
-        // Remove from list
         this.wires.splice(index, 1);
-
         this.runSimulation();
     }
 
@@ -644,63 +702,45 @@ class LogicBoard {
         if (index === -1) return;
 
         const gate = this.gates[index];
-
-        // Remove all connected wires
         const wiresToRemove = this.wires.filter(w => w.fromGate === gateId || w.toGate === gateId);
         wiresToRemove.forEach(w => this.removeWire(w.id));
 
-        // Remove DOM
         if (gate.element) gate.element.remove();
-
-        // Remove from list
         this.gates.splice(index, 1);
-
         this.runSimulation();
     }
 
     generateTotalExpression() {
         const light = this.gates.find(g => g.type === 'LIGHT');
         if (!light) return 'No Output';
-
-        // Find input connected to light
         const finalWire = this.wires.find(w => w.toGate === light.id);
         if (!finalWire) return 'Light OFF';
-
         const sourceGate = this.gates.find(g => g.id === finalWire.fromGate);
         if (!sourceGate) return 'Light OFF';
-
         return sourceGate.getExpression();
     }
 
     updateExpressionDisplay() {
         const display = document.getElementById('expression-display');
         if (!display) return;
-
-        // Find all Lights
         const lights = this.gates.filter(g => g.type === 'LIGHT');
         if (lights.length === 0) {
             display.innerText = 'Expression: No Output';
             return;
         }
-
         const exprs = lights.map((light, i) => {
             const finalWire = this.wires.find(w => w.toGate === light.id);
             if (!finalWire) return `L${i + 1}: OFF`;
-
             const sourceGate = this.gates.find(g => g.id === finalWire.fromGate);
             if (!sourceGate) return `L${i + 1}: OFF`;
-
             return `L${i + 1} = ${sourceGate.getExpression()}`;
         });
-
         display.innerText = exprs.join(' | ');
     }
 
     runSimulation() {
-        // Simple event propagation
         let changed = true;
         let limit = 0;
-
         while (changed && limit < 50) {
             changed = false;
             this.gates.forEach(gate => {
@@ -710,10 +750,7 @@ class LogicBoard {
             });
             limit++;
         }
-
-        // Update Wire Colors
         this.wires.forEach(w => this.updateWireVisual(w));
-
         this.updateExpressionDisplay();
     }
 
@@ -727,11 +764,12 @@ class LogicBoard {
         this.tempWire = null;
         this.wiringStartNode = null;
         window.removeEventListener('mousemove', this.mouseMoveHandler);
+        if (this.touchMoveHandler) window.removeEventListener('touchmove', this.touchMoveHandler);
+        if (this.touchEndHandler) window.removeEventListener('touchend', this.touchEndHandler);
     }
 
     updateWireVisual(wire) {
         if (!wire.element) return;
-
         const sourceGate = this.gates.find(g => g.id === wire.fromGate);
         const targetGate = this.gates.find(g => g.id === wire.toGate);
 
@@ -756,28 +794,8 @@ class LogicBoard {
     }
 
     updateWiresForGate(gate) {
-        // Find all wires connected to this gate (in or out)
         const connectedWires = this.wires.filter(w => w.fromGate === gate.id || w.toGate === gate.id);
         connectedWires.forEach(w => this.updateWireVisual(w));
-    }
-
-    runSimulation_duplicate() {
-        // Simple event propagation
-        let changed = true;
-        let limit = 0;
-
-        while (changed && limit < 50) {
-            changed = false;
-            this.gates.forEach(gate => {
-                const oldState = gate.outputState;
-                gate.evaluate();
-                if (gate.outputState !== oldState) changed = true;
-            });
-            limit++;
-        }
-
-        // Update Wire Colors
-        this.wires.forEach(w => this.updateWireVisual(w));
     }
 
     clearBoard() {
